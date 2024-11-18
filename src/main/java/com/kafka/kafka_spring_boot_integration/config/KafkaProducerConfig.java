@@ -1,4 +1,4 @@
-package com.kafka.kafka_spring_boot_integration;
+package com.kafka.kafka_spring_boot_integration.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -30,6 +30,7 @@ public class KafkaProducerConfig {
         log.info("Default Kafka Producer Factory Started");
         return new DefaultKafkaProducerFactory<>(configProps);
     }
+
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
         log.info("Kafka Template generated");
