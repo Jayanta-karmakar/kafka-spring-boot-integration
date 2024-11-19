@@ -1,9 +1,9 @@
 package com.kafka.kafka_spring_boot_integration.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -22,11 +22,14 @@ import java.util.Map;
 @Slf4j
 @Configuration
 public class KafkaProducerConfig {
+
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String kafkaServer;
+
     @Bean
-    public ProducerFactory<Object, Object> producerFactory() {
+    public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "jayantakarmakar998");
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         log.info("Default Kafka Producer Factory Started");
@@ -34,8 +37,10 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<Object, Object> kafkaTemplate() {
+    public KafkaTemplate<String, Object> kafkaTemplate(
+            ProducerFactory<String, Object> producerFactory
+    ) {
         log.info("Kafka Template generated");
-        return new KafkaTemplate<>(producerFactory());
+        return new KafkaTemplate<>(producerFactory);
     }
 }
