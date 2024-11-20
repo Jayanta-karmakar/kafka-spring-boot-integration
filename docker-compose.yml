@@ -1,4 +1,3 @@
-
 networks:
   kafka-net:
     driver: bridge
@@ -22,22 +21,34 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
       # Controller quorum voters (KRaft mode-specific)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 
       # Log directory and cluster ID
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - ./kafka-data:/tmp/kraft-combined-logs
+      - ./kafka-config:/opt/kafka/config
     networks:
       - kafka-net
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
+  #  kafka-ui:
+  #    image: provectuslabs/kafka-ui:latest
+  #    container_name: kafka-ui
+  #    ports:
+  #      - "8080:8080"
+  #    environment:
+  #      KAFKA_CLUSTERS_0_NAME: local
+  #      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+  #    networks:
+  #      - kafka-net
+
+  kafbat-ui:
+    container_name: kafbat-ui
+    image: ghcr.io/kafbat/kafka-ui:latest
     ports:
-      - "8080:8080"
+      - 8080:8080
     environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    networks:
-      - kafka-net
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    volumes:
+      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
