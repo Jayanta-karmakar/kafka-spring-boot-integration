@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class MessageConsumerController {
 
     @KafkaListener(topics = "test", groupId = "jayanta")
-    public void listener(Object data) {
+    public void listener(String data) {
         log.info("Data Received through KafkaListener : {}", data);
     }
 }
