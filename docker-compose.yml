@@ -3,52 +3,35 @@ networks:
     driver: bridge
 
 services:
-  kafka:
+  broker:
     image: apache/kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"
+      - "9094:9094"
     environment:
-      # Kafka roles
-      KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
-
-      # Listeners and protocols
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://kafka:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:9094,CONTROLLER://broker:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:9094
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-
-      # Controller quorum voters (KRaft mode-specific)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-
-      # Log directory and cluster ID
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - ./kafka-data:/tmp/kraft-combined-logs
-      - ./kafka-config:/opt/kafka/config
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 1
     networks:
       - kafka-net
 
-  #  kafka-ui:
-  #    image: provectuslabs/kafka-ui:latest
-  #    container_name: kafka-ui
-  #    ports:
-  #      - "8080:8080"
-  #    environment:
-  #      KAFKA_CLUSTERS_0_NAME: local
-  #      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-  #    networks:
-  #      - kafka-net
-
-  kafbat-ui:
-    container_name: kafbat-ui
-    image: ghcr.io/kafbat/kafka-ui:latest
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-    volumes:
-      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
+    networks:
+      - kafka-net
