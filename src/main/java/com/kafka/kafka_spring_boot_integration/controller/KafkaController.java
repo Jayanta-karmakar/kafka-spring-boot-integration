@@ -29,4 +29,9 @@ public class KafkaController {
         kafkaTemplate.send(topic, message);
         return new ResponseEntity<>("Message sent: " + message, HttpStatus.OK);
     }
+
+    public void sendMessageToKafka() {
+        String topic = "test";
+        kafkaTemplate.send(topic, message);
+    }
 }
