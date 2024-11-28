@@ -29,4 +29,12 @@ public class KafkaController {
         kafkaTemplate.send(topic, message);
         return new ResponseEntity<>("Message sent: " + message, HttpStatus.OK);
     }
+
+        @PostMapping(value = "/send")
+    public ResponseEntity<?> sendMessageToKafka(
+            @RequestParam(value = "message") String message) {
+        String topic = "test";
+        kafkaTemplate.send(topic, message);
+        return new ResponseEntity<>("Message sent: " + message, HttpStatus.OK);
+    }
 }
